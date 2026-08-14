@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agendamento — Barbearia</title>
+  <meta name="description" content="Agende seu horário de corte de cabelo e barba online." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-mark">✂</span>
+        <div>
+          <h1 class="brand-name" id="brandName">Barbearia</h1>
+          <p class="brand-tagline" id="brandTagline">Agendamento online</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="#agendar" class="nav-link">Agendar</a>
+        <a href="#meus-agendamentos" class="nav-link">Meus agendamentos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <p class="hero-eyebrow">Barbearia</p>
+          <h2 class="hero-title" id="heroTitle">Reserve seu horário<br />em poucos cliques</h2>
+          <p class="hero-sub" id="heroSlogan">Corte, barba e estilo no capricho.</p>
+          <div class="hero-actions">
+            <a href="#agendar" class="btn btn-primary">Agendar agora</a>
+            <a href="#" class="btn btn-ghost" id="mapsLink" target="_blank" rel="noopener">Ver no mapa</a>
+          </div>
+          <ul class="hero-info">
+            <li><span class="ico">📍</span><span id="infoEndereco">—</span></li>
+            <li><span class="ico">📞</span><span id="infoTelefone">—</span></li>
+            <li><span class="ico">🕒</span><span id="infoHorario">—</span></li>
+          </ul>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-inner">
+            <p class="hero-card-title">Agendamento rápido</p>
+            <ol class="steps">
+              <li><b>1</b> Escolha o serviço</li>
+              <li><b>2</b> Selecione dia e horário</li>
+              <li><b>3</b> Confirme seus dados</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENDAR -->
+    <section id="agendar" class="section">
+      <div class="container">
+        <h3 class="section-title">Fazer um agendamento</h3>
+        <p class="section-lead">Preencha os passos abaixo. Leva menos de um minuto.</p>
+
+        <form id="bookingForm" class="booking" novalidate>
+          <!-- Passo 1: serviço -->
+          <fieldset class="step">
+            <legend><span class="step-num">1</span> Serviço</legend>
+            <div class="options-grid" id="servicesGrid"></div>
+          </fieldset>
+
+          <!-- Passo 2: profissional -->
+          <fieldset class="step">
+            <legend><span class="step-num">2</span> Profissional</legend>
+            <div class="options-grid options-grid--pros" id="prosGrid"></div>
+          </fieldset>
+
+          <!-- Passo 3: data -->
+          <fieldset class="step">
+            <legend><span class="step-num">3</span> Data</legend>
+            <div class="days-scroller" id="daysScroller"></div>
+          </fieldset>
+
+          <!-- Passo 4: horário -->
+          <fieldset class="step">
+            <legend><span class="step-num">4</span> Horário</legend>
+            <div class="slots-grid" id="slotsGrid">
+              <p class="muted slots-empty">Selecione uma data para ver os horários.</p>
+            </div>
+          </fieldset>
+
+          <!-- Passo 5: dados -->
+          <fieldset class="step">
+            <legend><span class="step-num">5</span> Seus dados</legend>
+            <div class="fields">
+              <label class="field">
+                <span>Nome completo</span>
+                <input type="text" id="fldNome" name="nome" autocomplete="name" placeholder="Ex.: João da Silva" required />
+              </label>
+              <label class="field">
+                <span>Telefone / WhatsApp</span>
+                <input type="tel" id="fldTelefone" name="telefone" autocomplete="tel" placeholder="(00) 90000-0000" required />
+              </label>
+              <label class="field field--full">
+                <span>Observações (opcional)</span>
+                <input type="text" id="fldObs" name="obs" placeholder="Alguma preferência? Ex.: máquina 2 nas laterais" />
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- Resumo + submit -->
+          <div class="summary" id="summary" hidden></div>
+          <p class="form-error" id="formError" hidden></p>
+
+          <div class="booking-actions">
+            <button type="submit" class="btn btn-primary btn-lg" id="confirmBtn">Confirmar agendamento</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- MEUS AGENDAMENTOS -->
+    <section id="meus-agendamentos" class="section section--alt">
+      <div class="container">
+        <h3 class="section-title">Meus agendamentos</h3>
+        <p class="section-lead">Estes agendamentos ficam salvos neste navegador.</p>
+        <div id="myBookings" class="my-bookings">
+          <p class="muted">Você ainda não tem agendamentos.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-brand" id="footerBrand">Barbearia</p>
+        <p class="muted" id="footerEndereco">—</p>
+      </div>
+      <p class="muted small">Agendamentos salvos localmente no seu navegador (localStorage).</p>
+    </div>
+  </footer>
+
+  <!-- Modal de confirmação -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-check">✓</div>
+      <h4 id="modalTitle">Agendamento confirmado!</h4>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions">
+        <a href="#" class="btn btn-primary" id="modalWhats" target="_blank" rel="noopener">Confirmar no WhatsApp</a>
+        <button class="btn btn-ghost" data-close>Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
