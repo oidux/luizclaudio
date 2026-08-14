@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0e0f13" />
   <title>Agendamento — Barbearia</title>
-  <meta name="description" content="Agende seu horário de corte de cabelo e barba online." />
+  <meta name="description" content="Agende seu horário, acompanhe sua fidelidade e assine o clube." />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
-  <div class="app">
+  <div class="app" data-view="agendar">
     <!-- Barra de topo -->
     <header class="appbar">
       <button type="button" class="icon-btn back-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -23,101 +23,135 @@
       <a class="icon-btn" id="mapsLink" href="#" target="_blank" rel="noopener" aria-label="Ver no mapa">📍</a>
     </header>
 
-    <!-- Progresso do wizard -->
-    <div class="wizard-head" id="wizardHead">
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="progress-label" id="progressLabel">Passo 1 de 5</span>
-    </div>
-
     <main class="app-main">
-      <form id="bookingForm" class="booking" novalidate>
-
-        <!-- Passo 1: serviço -->
-        <section class="wizard-step is-active" data-step="1">
-          <p class="step-kicker">Boas-vindas 👋</p>
-          <h2 class="step-heading">Qual serviço você quer?</h2>
-          <p class="step-hint" id="shopInfoLine">—</p>
-          <div class="options-grid" id="servicesGrid"></div>
-        </section>
-
-        <!-- Passo 2: profissional -->
-        <section class="wizard-step" data-step="2">
-          <p class="step-kicker">Serviço escolhido</p>
-          <h2 class="step-heading">Com quem prefere cortar?</h2>
-          <p class="step-hint">Toque para escolher o profissional.</p>
-          <div class="options-grid" id="prosGrid"></div>
-        </section>
-
-        <!-- Passo 3: data -->
-        <section class="wizard-step" data-step="3">
-          <p class="step-kicker">Quase lá</p>
-          <h2 class="step-heading">Escolha o dia</h2>
-          <p class="step-hint">Deslize para ver mais datas.</p>
-          <div class="days-scroller" id="daysScroller"></div>
-        </section>
-
-        <!-- Passo 4: horário -->
-        <section class="wizard-step" data-step="4">
-          <p class="step-kicker" id="step4Kicker">Dia escolhido</p>
-          <h2 class="step-heading">Escolha o horário</h2>
-          <p class="step-hint">Toque no horário disponível.</p>
-          <div class="slots-grid" id="slotsGrid">
-            <p class="muted slots-empty">Selecione uma data para ver os horários.</p>
-          </div>
-        </section>
-
-        <!-- Passo 5: dados + revisão -->
-        <section class="wizard-step" data-step="5">
-          <p class="step-kicker">Último passo</p>
-          <h2 class="step-heading">Confirme seu agendamento</h2>
-
-          <div class="review-card" id="reviewCard"></div>
-          <div class="sinal-note" id="sinalNote" hidden></div>
-
-          <div class="fields">
-            <label class="field">
-              <span>Nome completo</span>
-              <input type="text" id="fldNome" name="nome" autocomplete="name" placeholder="Ex.: João da Silva" required />
-            </label>
-            <label class="field">
-              <span>Telefone / WhatsApp</span>
-              <input type="tel" id="fldTelefone" name="telefone" inputmode="tel" autocomplete="tel" placeholder="(00) 90000-0000" required />
-            </label>
-            <label class="field">
-              <span>Observações (opcional)</span>
-              <input type="text" id="fldObs" name="obs" placeholder="Ex.: máquina 2 nas laterais" />
-            </label>
-          </div>
-
-          <p class="form-error" id="formError" hidden></p>
-        </section>
-      </form>
-
-      <!-- MEUS AGENDAMENTOS (só na tela inicial) -->
-      <section class="post-booking" data-step="1">
-        <div class="step-divider"><span>Meus agendamentos</span></div>
-        <div id="myBookings" class="my-bookings">
-          <p class="muted">Você ainda não tem agendamentos.</p>
+      <!-- ============ VIEW: AGENDAR ============ -->
+      <section class="view is-active" id="view-agendar">
+        <div class="wizard-head" id="wizardHead">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <span class="progress-label" id="progressLabel">Passo 1 de 5</span>
         </div>
-        <footer class="app-footer">
-          <p class="footer-brand" id="footerBrand">Barbearia</p>
-          <p class="muted small" id="footerEndereco">—</p>
-          <p class="muted small">Agendamentos salvos neste aparelho.</p>
-        </footer>
+
+        <form id="bookingForm" class="booking" novalidate>
+          <section class="wizard-step is-active" data-step="1">
+            <p class="step-kicker">Boas-vindas 👋</p>
+            <h2 class="step-heading">Qual serviço você quer?</h2>
+            <p class="step-hint" id="shopInfoLine">—</p>
+            <div class="options-grid" id="servicesGrid"></div>
+          </section>
+
+          <section class="wizard-step" data-step="2">
+            <p class="step-kicker">Serviço escolhido</p>
+            <h2 class="step-heading">Com quem prefere cortar?</h2>
+            <p class="step-hint">Toque para escolher o profissional.</p>
+            <div class="options-grid" id="prosGrid"></div>
+          </section>
+
+          <section class="wizard-step" data-step="3">
+            <p class="step-kicker">Quase lá</p>
+            <h2 class="step-heading">Escolha o dia</h2>
+            <p class="step-hint">Deslize para ver mais datas.</p>
+            <div class="days-scroller" id="daysScroller"></div>
+          </section>
+
+          <section class="wizard-step" data-step="4">
+            <p class="step-kicker" id="step4Kicker">Dia escolhido</p>
+            <h2 class="step-heading">Escolha o horário</h2>
+            <p class="step-hint">Toque no horário disponível.</p>
+            <div class="slots-grid" id="slotsGrid">
+              <p class="muted slots-empty">Selecione uma data para ver os horários.</p>
+            </div>
+          </section>
+
+          <section class="wizard-step" data-step="5">
+            <p class="step-kicker">Último passo</p>
+            <h2 class="step-heading">Confirme seu agendamento</h2>
+            <div class="review-card" id="reviewCard"></div>
+            <div class="sinal-note" id="sinalNote" hidden></div>
+            <div class="fields">
+              <label class="field"><span>Nome completo</span>
+                <input type="text" id="fldNome" name="nome" autocomplete="name" placeholder="Ex.: João da Silva" required /></label>
+              <label class="field"><span>Telefone / WhatsApp</span>
+                <input type="tel" id="fldTelefone" name="telefone" inputmode="tel" autocomplete="tel" placeholder="(00) 90000-0000" required /></label>
+              <label class="field"><span>Observações (opcional)</span>
+                <input type="text" id="fldObs" name="obs" placeholder="Ex.: máquina 2 nas laterais" /></label>
+            </div>
+            <div class="confirm-inline">
+              <div class="ci-total"><span class="ab-label">Total</span><span class="ab-total" id="abTotal">—</span></div>
+              <button type="submit" class="btn btn-primary" id="confirmBtn">Confirmar agendamento</button>
+            </div>
+            <p class="form-error" id="formError" hidden></p>
+          </section>
+        </form>
+
+        <section class="post-booking" data-step="1">
+          <div class="step-divider"><span>Próximos agendamentos</span></div>
+          <div id="myBookings" class="my-bookings">
+            <p class="muted">Você ainda não tem agendamentos.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============ VIEW: FIDELIDADE ============ -->
+      <section class="view" id="view-fidelidade">
+        <div class="member-hero" id="memberHero"></div>
+        <div class="stamp-wrap" id="stampCard"></div>
+        <div class="step-divider"><span>Histórico de cortes</span></div>
+        <div class="history-list" id="historyList"></div>
+      </section>
+
+      <!-- ============ VIEW: CLUBE ============ -->
+      <section class="view" id="view-clube">
+        <div id="clubePlansPanel">
+          <p class="step-kicker">Assinatura mensal</p>
+          <h2 class="step-heading">Clube LC</h2>
+          <p class="step-hint">Corte quando quiser e pague por mês. Cancele quando precisar.</p>
+          <div id="clubeStatus"></div>
+          <div class="plans" id="clubePlans"></div>
+        </div>
+
+        <div id="clubeCheckoutPanel" hidden>
+          <button type="button" class="link-back" id="clubeBack">‹ Voltar aos planos</button>
+          <h2 class="step-heading">Pagamento</h2>
+          <p class="step-hint" id="clubeCheckoutSub">—</p>
+
+          <div class="cc-preview" id="ccPreview">
+            <div class="cc-brand" id="ccBrand">CARTÃO</div>
+            <div class="cc-number" id="ccNumberView">•••• •••• •••• ••••</div>
+            <div class="cc-row">
+              <div><span class="cc-cap">Titular</span><div id="ccNameView">NOME NO CARTÃO</div></div>
+              <div><span class="cc-cap">Validade</span><div id="ccExpView">MM/AA</div></div>
+            </div>
+          </div>
+
+          <form id="ccForm" class="fields" novalidate>
+            <label class="field"><span>Número do cartão</span>
+              <input type="tel" id="ccNumber" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" /></label>
+            <label class="field"><span>Nome impresso no cartão</span>
+              <input type="text" id="ccName" autocomplete="cc-name" placeholder="Como está no cartão" /></label>
+            <div class="fields-row">
+              <label class="field"><span>Validade</span>
+                <input type="tel" id="ccExp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" /></label>
+              <label class="field"><span>CVV</span>
+                <input type="tel" id="ccCvv" inputmode="numeric" autocomplete="cc-csc" placeholder="000" maxlength="4" /></label>
+            </div>
+            <p class="recurring-note">🔁 Cobrança mensal recorrente. Cancele quando quiser.</p>
+            <p class="demo-note">🔒 Ambiente de demonstração — nenhum pagamento é processado de verdade.</p>
+            <p class="form-error" id="ccError" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="ccSubmit">Assinar plano</button>
+          </form>
+        </div>
       </section>
     </main>
 
-    <!-- Barra de ação (só no passo 5) -->
-    <div class="actionbar" id="actionbar" hidden>
-      <div class="actionbar-info">
-        <span class="ab-label">Total</span>
-        <span class="ab-total" id="abTotal">—</span>
-      </div>
-      <button type="submit" form="bookingForm" class="btn btn-primary" id="confirmBtn">Confirmar agendamento</button>
-    </div>
+    <!-- Abas -->
+    <nav class="tabbar">
+      <button type="button" class="tab is-active" data-tab="agendar"><span class="tab-ico">✂️</span><span>Agendar</span></button>
+      <button type="button" class="tab" data-tab="fidelidade"><span class="tab-ico">⭐</span><span>Fidelidade</span></button>
+      <button type="button" class="tab" data-tab="clube"><span class="tab-ico">💳</span><span>Clube</span></button>
+    </nav>
   </div>
 
-  <!-- Bottom sheet de confirmação -->
+  <!-- Bottom sheet: confirmação de agendamento -->
   <div class="sheet" id="modal" hidden>
     <div class="sheet-backdrop" data-close></div>
     <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -133,7 +167,22 @@
     </div>
   </div>
 
+  <!-- Bottom sheet: sucesso genérico (resgate / assinatura) -->
+  <div class="sheet" id="okSheet" hidden>
+    <div class="sheet-backdrop" data-close-ok></div>
+    <div class="sheet-card" role="dialog" aria-modal="true">
+      <div class="sheet-handle"></div>
+      <div class="sheet-check" id="okIcon">✓</div>
+      <h4 id="okTitle">Pronto!</h4>
+      <div class="sheet-body" id="okBody"></div>
+      <div class="sheet-actions">
+        <button class="btn btn-primary btn-block" data-close-ok>Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/js/config.js"></script>
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/membro.js"></script>
 </body>
 </html>

@@ -20,6 +20,7 @@
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function setText(sel, txt) { var e = $(sel); if (e) e.textContent = txt; }
   function money(v) { return "R$ " + v.toFixed(2).replace(".", ","); }
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function isoDate(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
@@ -84,12 +85,12 @@
   // ---------- Infos da barbearia ----------
   function fillShopInfo() {
     document.title = "Agendamento — " + CFG.nome;
-    $("#brandName").textContent = CFG.nome;
-    $("#footerBrand").textContent = CFG.nome;
-    $("#footerEndereco").textContent = CFG.endereco + " · " + CFG.cidade;
+    setText("#brandName", CFG.nome);
+    setText("#footerBrand", CFG.nome);
+    setText("#footerEndereco", CFG.endereco + " · " + CFG.cidade);
 
     var av = CFG.avaliacao ? "★ " + CFG.avaliacao + "  ·  " : "";
-    $("#shopInfoLine").textContent = av + CFG.endereco + "  ·  " + resumoHorario();
+    setText("#shopInfoLine", av + CFG.endereco + "  ·  " + resumoHorario());
 
     var maps = $("#mapsLink");
     if (CFG.mapsUrl) maps.href = CFG.mapsUrl; else maps.style.display = "none";
@@ -289,9 +290,6 @@
     // conteúdo dependente
     if (n === 4) renderSlots();
     if (n === 5) { renderReview(); updateTotal(); }
-
-    // barra de ação só no passo final
-    $("#actionbar").hidden = (n !== 5);
 
     // "meus agendamentos" só na tela inicial
     $all(".post-booking").forEach(function (p) { p.classList.toggle("is-visible", n === 1); });

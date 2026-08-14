@@ -62,4 +62,18 @@ window.SHOP_CONFIG = {
     { id: "luiz",     nome: "Luiz Cláudio",    especialidade: "Cortes, barba e navalha" },
     { id: "qualquer", nome: "Sem preferência", especialidade: "Primeiro disponível" },
   ],
+
+  // --- Fidelidade ---
+  // A cada `meta` cortes, o cliente ganha 1 grátis.
+  fidelidade: { ativa: true, meta: 10 },
+
+  // --- Clube (assinatura mensal) ---
+  planos: [
+    { id: "basico",    nome: "Clube Básico",    preco: 89,  destaque: false,
+      beneficios: ["2 cortes por mês", "10% de desconto em produtos"] },
+    { id: "ilimitado", nome: "Clube Ilimitado", preco: 149, destaque: true,
+      beneficios: ["Cortes ilimitados", "1 barba por semana", "10% em produtos"] },
+    { id: "premium",   nome: "Clube Premium",   preco: 219, destaque: false,
+      beneficios: ["Tudo do Ilimitado", "Barba e sobrancelha inclusas", "Atendimento prioritário"] },
+  ],
 };
