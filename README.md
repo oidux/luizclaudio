@@ -18,17 +18,32 @@ python3 -m http.server 8000
 
 ## Fluxo de agendamento
 
+Interface em **passo a passo** (uma decisão por tela), com barra de progresso e botão voltar:
+
 1. Escolha o **serviço** (corte, barba, navalha, etc.)
 2. Escolha o **profissional**
 3. Selecione a **data** (respeita os dias de funcionamento)
 4. Escolha o **horário** (gerados automaticamente conforme a duração do serviço e
    o horário de funcionamento; horários já reservados ou que já passaram ficam bloqueados)
-5. Informe **nome e telefone** e confirme
-6. Ao confirmar, aparece um resumo e um botão para **enviar a confirmação no WhatsApp**
-   da barbearia
+5. Confira o **resumo** (com "Editar" em cada item), informe **nome e telefone** e confirme
+6. Ao confirmar, aparece o **sinal via Pix** (código copia-e-cola) e um botão para
+   **enviar a confirmação no WhatsApp** da barbearia
 
 A seção **Meus agendamentos** lista as reservas futuras salvas naquele navegador,
 com opção de reenviar no WhatsApp ou cancelar (o cancelamento libera o horário).
+
+## Sinal via Pix
+
+Para reduzir faltas, o portal pede um **sinal** (percentual configurável) na confirmação:
+
+- Gera um **Pix "Copia e Cola"** válido (payload EMV BR Code com CRC16) para o cliente
+  colar direto no app do banco
+- Mostra o valor do sinal, o restante a pagar no local e a chave Pix
+- Inclui o sinal na mensagem de confirmação do WhatsApp
+
+Configure em `assets/js/config.js` (`sinalAtivo`, `sinalPercent`, `pix.chave`, `pix.nome`,
+`pix.cidade`). **Troque `pix.chave` pela chave Pix real do recebedor.** Para desligar o
+sinal, defina `sinalAtivo: false`.
 
 ## Personalização
 

@@ -233,6 +233,42 @@ a { color: inherit; text-decoration: none; }
 .review-row .rv-value { font-weight: 600; }
 .review-row .rv-edit { flex: 0 0 auto; color: var(--accent-strong); font-size: 0.85rem; font-weight: 600; background: none; border: 0; cursor: pointer; padding: 6px; }
 
+/* ---------- Nota do sinal (passo 5) ---------- */
+.sinal-note {
+  display: flex; align-items: flex-start; gap: 12px;
+  border: 1.5px solid rgba(212,162,78,0.5);
+  border-radius: 14px;
+  background: rgba(212,162,78,0.08);
+  padding: 14px 16px;
+  margin-bottom: 22px;
+}
+.sinal-note[hidden] { display: none; }
+.sinal-note .sn-emoji { font-size: 1.3rem; flex: 0 0 auto; }
+.sinal-note .sn-body { display: flex; flex-direction: column; gap: 3px; font-size: 0.98rem; }
+.sinal-note .sn-sub { color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- Bloco Pix (confirmação) ---------- */
+.pix-block { text-align: left; margin: 4px 0 18px; }
+.pix-block[hidden] { display: none; }
+.pix-title { margin: 0 0 8px; font-size: 0.98rem; }
+.pix-key { margin: 0 0 10px; font-size: 0.9rem; color: var(--muted); word-break: break-all; }
+.pix-key b { color: var(--text); }
+.pix-code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  max-height: 92px;
+  overflow-y: auto;
+  word-break: break-all;
+}
+.pix-hint { margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+
 /* ---------- Fields ---------- */
 .fields { display: grid; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; }

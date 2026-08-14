@@ -33,6 +33,54 @@
   function loadBookings() { try { var r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : []; } catch (e) { return []; } }
   function saveBookings(list) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {} }
 
+  // ---------- Sinal / Pix ----------
+  function sinalAtivo() { return !!(CFG.sinalAtivo && CFG.pix && CFG.pix.chave); }
+  function valorSinal(preco) { return Math.round(preco * (CFG.sinalPercent || 0) * 100) / 100; }
+  function pctSinal() { return Math.round((CFG.sinalPercent || 0) * 100); }
+
+  // Monta o "Pix Copia e Cola" (payload EMV BR Code) com CRC16-CCITT.
+  function tlv(id, val) { val = "" + val; return id + pad(val.length) + val; }
+  function crc16(str) {
+    var crc = 0xFFFF;
+    for (var i = 0; i < str.length; i++) {
+      crc ^= str.charCodeAt(i) << 8;
+      for (var j = 0; j < 8; j++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+    }
+    return ("000" + crc.toString(16).toUpperCase()).slice(-4);
+  }
+  function pixPayload(amount, txid) {
+    var p = CFG.pix;
+    var mai = tlv("00", "br.gov.bcb.pix") + tlv("01", p.chave);
+    var nome = (p.nome || "RECEBEDOR").slice(0, 25);
+    var cidade = (p.cidade || "BRASIL").slice(0, 15);
+    var tx = (txid || "***").replace(/[^A-Za-z0-9]/g, "").slice(0, 25) || "***";
+    var body =
+      tlv("00", "01") +
+      tlv("01", "11") +
+      tlv("26", mai) +
+      tlv("52", "0000") +
+      tlv("53", "986") +
+      tlv("54", amount) +
+      tlv("58", "BR") +
+      tlv("59", nome) +
+      tlv("60", cidade) +
+      tlv("62", tlv("05", tx)) +
+      "6304";
+    return body + crc16(body);
+  }
+  function copiaCola(str, btn) {
+    var reset = function () { setTimeout(function () { btn.textContent = "Copiar código Pix"; }, 1800); };
+    var ok = function () { btn.textContent = "Copiado ✓"; reset(); };
+    var fb = function () {
+      var ta = document.createElement("textarea"); ta.value = str; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand("copy"); ok(); } catch (e) {}
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(str).then(ok, fb);
+    else fb();
+  }
+
   // ---------- Infos da barbearia ----------
   function fillShopInfo() {
     document.title = "Agendamento — " + CFG.nome;
@@ -190,6 +238,19 @@
     $all(".rv-edit", card).forEach(function (b) {
       b.addEventListener("click", function () { goTo(+b.getAttribute("data-goto")); });
     });
+
+    var note = $("#sinalNote");
+    if (note) {
+      if (svc && sinalAtivo()) {
+        note.innerHTML =
+          '<span class="sn-emoji">💸</span>' +
+          '<span class="sn-body"><b>Sinal de ' + money(valorSinal(svc.preco)) + '</b> (' + pctSinal() + '%) via Pix' +
+          '<span class="sn-sub">Restante de ' + money(svc.preco - valorSinal(svc.preco)) + ' no local. O código Pix aparece após confirmar.</span></span>';
+        note.hidden = false;
+      } else {
+        note.hidden = true;
+      }
+    }
   }
   function reviewRow(emoji, label, value, gotoStep) {
     return '<div class="review-row">' +
@@ -285,6 +346,7 @@
       profissionalId: pro.id, profissionalNome: pro.nome,
       dataISO: state.dataISO, horario: state.horario,
       cliente: nome, telefone: tel, obs: obs,
+      sinal: sinalAtivo() ? valorSinal(svc.preco) : 0,
     };
     var list = loadBookings(); list.push(booking); saveBookings(list);
 
@@ -303,10 +365,30 @@
 
   // ---------- Confirmação (bottom sheet) ----------
   function showConfirmation(b) {
-    $("#modalBody").innerHTML =
-      mbRow("Serviço", b.servicoNome) + mbRow("Profissional", b.profissionalNome) +
+    var rows = mbRow("Serviço", b.servicoNome) + mbRow("Profissional", b.profissionalNome) +
       mbRow("Data", formatDataLonga(b.dataISO)) + mbRow("Horário", b.horario) +
       mbRow("Cliente", b.cliente) + mbRow("Valor", money(b.preco));
+    if (b.sinal) rows += mbRow("Sinal (" + pctSinal() + "%)", money(b.sinal));
+    $("#modalBody").innerHTML = rows;
+
+    var pixBox = $("#pixBlock");
+    if (b.sinal && sinalAtivo()) {
+      var txid = "LC" + b.dataISO.replace(/-/g, "") + b.horario.replace(":", "");
+      var code = pixPayload(b.sinal.toFixed(2), txid);
+      pixBox.innerHTML =
+        '<p class="pix-title">Pague o sinal de <b>' + money(b.sinal) + '</b> por Pix para garantir seu horário</p>' +
+        '<p class="pix-key">Chave: <b>' + CFG.pix.chave + '</b></p>' +
+        '<div class="pix-code" id="pixCode">' + code + "</div>" +
+        '<button type="button" class="btn btn-outline btn-block" id="pixCopyBtn">Copiar código Pix</button>' +
+        '<p class="pix-hint">Depois de pagar, é só enviar o comprovante no WhatsApp. 🙂</p>';
+      pixBox.hidden = false;
+      var btn = $("#pixCopyBtn");
+      btn.addEventListener("click", function () { copiaCola(code, btn); });
+    } else {
+      pixBox.hidden = true;
+      pixBox.innerHTML = "";
+    }
+
     $("#modalWhats").href = whatsLink(b);
     $("#modal").hidden = false;
   }
@@ -316,6 +398,7 @@
       "• Serviço: " + b.servicoNome + "%0A• Profissional: " + b.profissionalNome + "%0A" +
       "• Data: " + formatDataLonga(b.dataISO) + "%0A• Horário: " + b.horario + "%0A" +
       "• Nome: " + encodeURIComponent(b.cliente) + (b.obs ? "%0A• Obs: " + encodeURIComponent(b.obs) : "");
+    if (b.sinal) msg += "%0A• Sinal (" + pctSinal() + "%25): R$ " + b.sinal.toFixed(2).replace(".", ",") + " via Pix — envio o comprovante";
     return "https://wa.me/" + CFG.whatsapp + "?text=" + msg;
   }
   function closeModal() { $("#modal").hidden = true; }
