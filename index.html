@@ -12,6 +12,7 @@
   <div class="app">
     <!-- Barra de topo -->
     <header class="appbar">
+      <button type="button" class="icon-btn back-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
       <div class="brand">
         <span class="brand-mark">LC</span>
         <div class="brand-text">
@@ -22,53 +23,56 @@
       <a class="icon-btn" id="mapsLink" href="#" target="_blank" rel="noopener" aria-label="Ver no mapa">📍</a>
     </header>
 
-    <main class="app-main">
-      <!-- HERO compacto -->
-      <section class="hero">
-        <p class="hero-eyebrow">Barbearia</p>
-        <h2 class="hero-title" id="heroTitle">Reserve seu horário</h2>
-        <p class="hero-sub" id="heroSlogan">Corte, barba e estilo no capricho.</p>
-        <div class="chips">
-          <span class="chip"><span class="ico">📍</span><span id="infoEndereco">—</span></span>
-          <span class="chip"><span class="ico">🕒</span><span id="infoHorario">—</span></span>
-        </div>
-        <div class="hero-actions">
-          <a class="btn btn-outline" id="callLink" href="#"><span class="ico">📞</span><span id="infoTelefone">Ligar</span></a>
-          <a class="btn btn-outline" id="mapsLink2" href="#" target="_blank" rel="noopener"><span class="ico">🗺️</span> Mapa</a>
-        </div>
-      </section>
+    <!-- Progresso do wizard -->
+    <div class="wizard-head" id="wizardHead">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-label" id="progressLabel">Passo 1 de 5</span>
+    </div>
 
-      <!-- AGENDAR -->
+    <main class="app-main">
       <form id="bookingForm" class="booking" novalidate>
+
         <!-- Passo 1: serviço -->
-        <section class="step">
-          <h3 class="step-title"><span class="step-num">1</span> Serviço</h3>
+        <section class="wizard-step is-active" data-step="1">
+          <p class="step-kicker">Boas-vindas 👋</p>
+          <h2 class="step-heading">Qual serviço você quer?</h2>
+          <p class="step-hint" id="shopInfoLine">—</p>
           <div class="options-grid" id="servicesGrid"></div>
         </section>
 
         <!-- Passo 2: profissional -->
-        <section class="step">
-          <h3 class="step-title"><span class="step-num">2</span> Profissional</h3>
+        <section class="wizard-step" data-step="2">
+          <p class="step-kicker">Serviço escolhido</p>
+          <h2 class="step-heading">Com quem prefere cortar?</h2>
+          <p class="step-hint">Toque para escolher o profissional.</p>
           <div class="options-grid" id="prosGrid"></div>
         </section>
 
         <!-- Passo 3: data -->
-        <section class="step">
-          <h3 class="step-title"><span class="step-num">3</span> Data</h3>
+        <section class="wizard-step" data-step="3">
+          <p class="step-kicker">Quase lá</p>
+          <h2 class="step-heading">Escolha o dia</h2>
+          <p class="step-hint">Deslize para ver mais datas.</p>
           <div class="days-scroller" id="daysScroller"></div>
         </section>
 
         <!-- Passo 4: horário -->
-        <section class="step">
-          <h3 class="step-title"><span class="step-num">4</span> Horário</h3>
+        <section class="wizard-step" data-step="4">
+          <p class="step-kicker" id="step4Kicker">Dia escolhido</p>
+          <h2 class="step-heading">Escolha o horário</h2>
+          <p class="step-hint">Toque no horário disponível.</p>
           <div class="slots-grid" id="slotsGrid">
             <p class="muted slots-empty">Selecione uma data para ver os horários.</p>
           </div>
         </section>
 
-        <!-- Passo 5: dados -->
-        <section class="step">
-          <h3 class="step-title"><span class="step-num">5</span> Seus dados</h3>
+        <!-- Passo 5: dados + revisão -->
+        <section class="wizard-step" data-step="5">
+          <p class="step-kicker">Último passo</p>
+          <h2 class="step-heading">Confirme seu agendamento</h2>
+
+          <div class="review-card" id="reviewCard"></div>
+
           <div class="fields">
             <label class="field">
               <span>Nome completo</span>
@@ -83,33 +87,32 @@
               <input type="text" id="fldObs" name="obs" placeholder="Ex.: máquina 2 nas laterais" />
             </label>
           </div>
-        </section>
 
-        <p class="form-error" id="formError" hidden></p>
+          <p class="form-error" id="formError" hidden></p>
+        </section>
       </form>
 
-      <!-- MEUS AGENDAMENTOS -->
-      <section class="step" id="meus-agendamentos">
-        <h3 class="step-title"><span class="ico">📋</span> Meus agendamentos</h3>
+      <!-- MEUS AGENDAMENTOS (só na tela inicial) -->
+      <section class="post-booking" data-step="1">
+        <div class="step-divider"><span>Meus agendamentos</span></div>
         <div id="myBookings" class="my-bookings">
           <p class="muted">Você ainda não tem agendamentos.</p>
         </div>
+        <footer class="app-footer">
+          <p class="footer-brand" id="footerBrand">Barbearia</p>
+          <p class="muted small" id="footerEndereco">—</p>
+          <p class="muted small">Agendamentos salvos neste aparelho.</p>
+        </footer>
       </section>
-
-      <footer class="app-footer">
-        <p class="footer-brand" id="footerBrand">Barbearia</p>
-        <p class="muted small" id="footerEndereco">—</p>
-        <p class="muted small">Agendamentos salvos neste aparelho.</p>
-      </footer>
     </main>
 
-    <!-- Barra de ação fixa -->
-    <div class="actionbar" id="actionbar">
+    <!-- Barra de ação (só no passo 5) -->
+    <div class="actionbar" id="actionbar" hidden>
       <div class="actionbar-info">
         <span class="ab-label">Total</span>
         <span class="ab-total" id="abTotal">—</span>
       </div>
-      <button type="submit" form="bookingForm" class="btn btn-primary btn-block" id="confirmBtn">Confirmar agendamento</button>
+      <button type="submit" form="bookingForm" class="btn btn-primary" id="confirmBtn">Confirmar agendamento</button>
     </div>
   </div>
 
