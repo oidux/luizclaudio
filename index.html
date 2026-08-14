@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e0f13" />
+  <title>Agendamento — Barbearia</title>
+  <meta name="description" content="Agende seu horário de corte de cabelo e barba online." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Barra de topo -->
+    <header class="appbar">
+      <div class="brand">
+        <span class="brand-mark">LC</span>
+        <div class="brand-text">
+          <span class="brand-name" id="brandName">Barbearia</span>
+          <span class="brand-tagline" id="brandTagline">Agendamento online</span>
+        </div>
+      </div>
+      <a class="icon-btn" id="mapsLink" href="#" target="_blank" rel="noopener" aria-label="Ver no mapa">📍</a>
+    </header>
+
+    <main class="app-main">
+      <!-- HERO compacto -->
+      <section class="hero">
+        <p class="hero-eyebrow">Barbearia</p>
+        <h2 class="hero-title" id="heroTitle">Reserve seu horário</h2>
+        <p class="hero-sub" id="heroSlogan">Corte, barba e estilo no capricho.</p>
+        <div class="chips">
+          <span class="chip"><span class="ico">📍</span><span id="infoEndereco">—</span></span>
+          <span class="chip"><span class="ico">🕒</span><span id="infoHorario">—</span></span>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-outline" id="callLink" href="#"><span class="ico">📞</span><span id="infoTelefone">Ligar</span></a>
+          <a class="btn btn-outline" id="mapsLink2" href="#" target="_blank" rel="noopener"><span class="ico">🗺️</span> Mapa</a>
+        </div>
+      </section>
+
+      <!-- AGENDAR -->
+      <form id="bookingForm" class="booking" novalidate>
+        <!-- Passo 1: serviço -->
+        <section class="step">
+          <h3 class="step-title"><span class="step-num">1</span> Serviço</h3>
+          <div class="options-grid" id="servicesGrid"></div>
+        </section>
+
+        <!-- Passo 2: profissional -->
+        <section class="step">
+          <h3 class="step-title"><span class="step-num">2</span> Profissional</h3>
+          <div class="options-grid" id="prosGrid"></div>
+        </section>
+
+        <!-- Passo 3: data -->
+        <section class="step">
+          <h3 class="step-title"><span class="step-num">3</span> Data</h3>
+          <div class="days-scroller" id="daysScroller"></div>
+        </section>
+
+        <!-- Passo 4: horário -->
+        <section class="step">
+          <h3 class="step-title"><span class="step-num">4</span> Horário</h3>
+          <div class="slots-grid" id="slotsGrid">
+            <p class="muted slots-empty">Selecione uma data para ver os horários.</p>
+          </div>
+        </section>
+
+        <!-- Passo 5: dados -->
+        <section class="step">
+          <h3 class="step-title"><span class="step-num">5</span> Seus dados</h3>
+          <div class="fields">
+            <label class="field">
+              <span>Nome completo</span>
+              <input type="text" id="fldNome" name="nome" autocomplete="name" placeholder="Ex.: João da Silva" required />
+            </label>
+            <label class="field">
+              <span>Telefone / WhatsApp</span>
+              <input type="tel" id="fldTelefone" name="telefone" inputmode="tel" autocomplete="tel" placeholder="(00) 90000-0000" required />
+            </label>
+            <label class="field">
+              <span>Observações (opcional)</span>
+              <input type="text" id="fldObs" name="obs" placeholder="Ex.: máquina 2 nas laterais" />
+            </label>
+          </div>
+        </section>
+
+        <p class="form-error" id="formError" hidden></p>
+      </form>
+
+      <!-- MEUS AGENDAMENTOS -->
+      <section class="step" id="meus-agendamentos">
+        <h3 class="step-title"><span class="ico">📋</span> Meus agendamentos</h3>
+        <div id="myBookings" class="my-bookings">
+          <p class="muted">Você ainda não tem agendamentos.</p>
+        </div>
+      </section>
+
+      <footer class="app-footer">
+        <p class="footer-brand" id="footerBrand">Barbearia</p>
+        <p class="muted small" id="footerEndereco">—</p>
+        <p class="muted small">Agendamentos salvos neste aparelho.</p>
+      </footer>
+    </main>
+
+    <!-- Barra de ação fixa -->
+    <div class="actionbar" id="actionbar">
+      <div class="actionbar-info">
+        <span class="ab-label">Total</span>
+        <span class="ab-total" id="abTotal">—</span>
+      </div>
+      <button type="submit" form="bookingForm" class="btn btn-primary btn-block" id="confirmBtn">Confirmar agendamento</button>
+    </div>
+  </div>
+
+  <!-- Bottom sheet de confirmação -->
+  <div class="sheet" id="modal" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="sheet-handle"></div>
+      <div class="sheet-check">✓</div>
+      <h4 id="modalTitle">Agendamento confirmado!</h4>
+      <div class="sheet-body" id="modalBody"></div>
+      <div class="sheet-actions">
+        <a href="#" class="btn btn-primary btn-block" id="modalWhats" target="_blank" rel="noopener">Confirmar no WhatsApp</a>
+        <button class="btn btn-ghost btn-block" data-close>Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
