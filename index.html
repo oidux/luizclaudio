@@ -34,9 +34,13 @@
         <form id="bookingForm" class="booking" novalidate>
           <section class="wizard-step is-active" data-step="1">
             <p class="step-kicker">Boas-vindas 👋</p>
-            <h2 class="step-heading">Qual serviço você quer?</h2>
+            <h2 class="step-heading">Quais serviços você quer?</h2>
             <p class="step-hint" id="shopInfoLine">—</p>
             <div class="options-grid" id="servicesGrid"></div>
+            <div class="confirm-inline" id="svcBar">
+              <div class="ci-total"><span class="ab-label">Total</span><span class="ab-total" id="svcTotal">—</span></div>
+              <button type="button" class="btn btn-primary" id="svcContinue" disabled>Continuar</button>
+            </div>
           </section>
 
           <section class="wizard-step" data-step="2">
