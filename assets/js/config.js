@@ -18,6 +18,18 @@ window.SHOP_CONFIG = {
   // WhatsApp (só dígitos, com DDI 55) para confirmar o agendamento
   whatsapp: "5562984242138",
 
+  // --- Sinal / entrada via Pix ---
+  // Cobrança de um sinal para garantir o horário e reduzir faltas.
+  sinalAtivo: true,
+  sinalPercent: 0.35, // 35% do valor do serviço
+  pix: {
+    // IMPORTANTE: troque pela CHAVE PIX REAL do recebedor.
+    // Pode ser CPF/CNPJ (só números), e-mail, telefone (+55DDXXXXXXXXX) ou chave aleatória.
+    chave: "+5562984242138",
+    nome: "LUIZ CLAUDIO BARBEARIA", // nome do recebedor (máx. 25 caracteres, sem acento)
+    cidade: "APARECIDA GO",         // cidade do recebedor (máx. 15 caracteres, sem acento)
+  },
+
   // --- Horário de funcionamento ---
   // 0 = domingo ... 6 = sábado. abre/fecha em "HH:MM" (24h). null = fechado.
   horarios: {
