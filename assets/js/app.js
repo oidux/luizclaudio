@@ -74,8 +74,13 @@
     $("#footerBrand").textContent = CFG.nome;
     $("#footerEndereco").textContent = CFG.endereco + " · " + CFG.cidade;
 
-    var maps = $("#mapsLink");
-    if (CFG.mapsUrl) maps.href = CFG.mapsUrl; else maps.style.display = "none";
+    // Links de mapa (topo + hero) e de ligação
+    [$("#mapsLink"), $("#mapsLink2")].forEach(function (a) {
+      if (!a) return;
+      if (CFG.mapsUrl) a.href = CFG.mapsUrl; else a.style.display = "none";
+    });
+    var call = $("#callLink");
+    if (call && CFG.telefone) call.href = "tel:" + CFG.telefone.replace(/[^0-9+]/g, "");
 
     // eyebrow com avaliação, se houver
     if (CFG.avaliacao) {
@@ -257,28 +262,16 @@
     return res;
   }
 
-  // ---------- Resumo ----------
+  // ---------- Resumo (barra de ação fixa) ----------
   function updateSummary() {
-    var box = $("#summary");
-    if (!state.servico && !state.profissional && !state.dataISO && !state.horario) {
-      box.hidden = true;
-      return;
-    }
     var svc = svcById(state.servico);
-    var pro = proById(state.profissional);
-    var rows = "";
+    var total = $("#abTotal");
+    if (total) total.textContent = svc ? money(svc.preco) : "—";
 
-    if (svc) rows += sumRow("Serviço", svc.nome + " (" + svc.duracao + " min)");
-    if (pro) rows += sumRow("Profissional", pro.nome);
-    if (state.dataISO) rows += sumRow("Data", formatDataLonga(state.dataISO));
-    if (state.horario) rows += sumRow("Horário", state.horario);
-    if (svc) rows += '<div class="sum-row sum-total"><span>Total</span><span>' + money(svc.preco) + "</span></div>";
-
-    box.innerHTML = rows;
-    box.hidden = false;
-  }
-  function sumRow(k, v) {
-    return '<div class="sum-row"><span>' + k + "</span><span>" + v + "</span></div>";
+    // habilita "Confirmar" só quando tudo estiver selecionado
+    var pronto = !!(state.servico && state.profissional && state.dataISO && state.horario);
+    var btn = $("#confirmBtn");
+    if (btn) btn.disabled = !pronto;
   }
   function formatDataLonga(iso) {
     var d = parseISO(iso);
@@ -357,7 +350,7 @@
       n.classList.remove("is-selected");
     });
     renderSlots();
-    $("#summary").hidden = true;
+    updateSummary();
   }
 
   // ---------- Confirmação (modal) ----------
@@ -446,6 +439,7 @@
     renderPros();
     renderDays();
     renderSlots();
+    updateSummary();
     renderMyBookings();
 
     $("#bookingForm").addEventListener("submit", onSubmit);
