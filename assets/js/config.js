@@ -48,13 +48,20 @@ window.SHOP_CONFIG = {
   diasDisponiveis: 21,
 
   // --- Serviços ---
+  // duracao em minutos; preco em R$. aPartirDe: mostra "a partir de".
   servicos: [
-    { id: "corte",        nome: "Corte de Cabelo",     duracao: 30, preco: 45 },
-    { id: "barba",        nome: "Barba",               duracao: 30, preco: 35 },
-    { id: "corte-barba",  nome: "Corte + Barba",       duracao: 60, preco: 70 },
-    { id: "navalha",      nome: "Corte com Navalha",   duracao: 45, preco: 55 },
-    { id: "infantil",     nome: "Corte Infantil",      duracao: 30, preco: 40 },
-    { id: "sobrancelha",  nome: "Sobrancelha",         duracao: 15, preco: 20 },
+    { id: "social",            nome: "Cabelo social",              duracao: 30, preco: 30 },
+    { id: "social-maquina",    nome: "Cabelo social simples (máquina)", duracao: 20, preco: 25 },
+    { id: "degrade",           nome: "Cabelo degradê",             duracao: 40, preco: 35 },
+    { id: "degrade-navalhado", nome: "Cabelo degradê navalhado",   duracao: 45, preco: 40 },
+    { id: "pesinho",           nome: "Pesinho",                    duracao: 10, preco: 15 },
+    { id: "sobrancelha",       nome: "Sobrancelha",                duracao: 15, preco: 15 },
+    { id: "barba",             nome: "Barba",                      duracao: 30, preco: 25 },
+    { id: "barba-pigmentacao", nome: "Barba e pigmentação",        duracao: 45, preco: 45 },
+    { id: "infantil",          nome: "Corte infantil",             duracao: 30, preco: 35 },
+    { id: "limpeza-simples",   nome: "Limpeza de pele simples",    duracao: 20, preco: 25 },
+    { id: "limpeza-completa",  nome: "Limpeza de pele completa",   duracao: 30, preco: 35 },
+    { id: "progressiva",       nome: "Progressiva",                duracao: 90, preco: 70, aPartirDe: true },
   ],
 
   // --- Profissionais ---
@@ -62,6 +69,17 @@ window.SHOP_CONFIG = {
     { id: "luiz",     nome: "Luiz Cláudio",    especialidade: "Cortes, barba e navalha" },
     { id: "qualquer", nome: "Sem preferência", especialidade: "Primeiro disponível" },
   ],
+
+  // --- Backend / dados ---
+  // "local"    = tudo no navegador (localStorage) — modo atual, sem servidor.
+  // "supabase" = usa o Supabase (quando estiver pronto). Ver docs/BACKEND.md.
+  backend: {
+    modo: "local",
+    // A chave ANON é PÚBLICA por natureza (protegida por RLS) — pode ir no GitHub.
+    // NUNCA coloque aqui a service_role key nem a senha do banco.
+    supabaseUrl: "",      // ex.: https://SEUPROJETO.supabase.co
+    supabaseAnonKey: "",  // chave anon/publishable
+  },
 
   // --- Fidelidade ---
   // A cada `meta` cortes, o cliente ganha 1 grátis.

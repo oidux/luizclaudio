@@ -10,10 +10,14 @@
   var DOW_LONG = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
   var MON_SHORT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-  var SVC_EMOJI = { corte: "✂️", barba: "🧔", "corte-barba": "💈", navalha: "🪒", infantil: "🧒", sobrancelha: "👁️" };
+  var SVC_EMOJI = {
+    social: "✂️", "social-maquina": "✂️", degrade: "💈", "degrade-navalhado": "🪒",
+    pesinho: "📏", sobrancelha: "👁️", barba: "🧔", "barba-pigmentacao": "🧔",
+    infantil: "🧒", "limpeza-simples": "🧖", "limpeza-completa": "🧖", progressiva: "💇"
+  };
   var PRO_EMOJI = { luiz: "💈", qualquer: "👥" };
 
-  var state = { servico: null, profissional: null, dataISO: null, horario: null };
+  var state = { servicos: [], profissional: null, dataISO: null, horario: null };
   var step = 1;
 
   // ---------- Utilidades ----------
@@ -29,6 +33,14 @@
   function fromMinutes(min) { return pad(Math.floor(min / 60)) + ":" + pad(min % 60); }
   function svcById(id) { return CFG.servicos.filter(function (s) { return s.id === id; })[0] || null; }
   function proById(id) { return CFG.profissionais.filter(function (p) { return p.id === id; })[0] || null; }
+
+  // ---------- Serviços selecionados (múltiplos) ----------
+  function selectedSvcs() { return state.servicos.map(svcById).filter(Boolean); }
+  function totalPreco() { return selectedSvcs().reduce(function (s, x) { return s + x.preco; }, 0); }
+  function totalDuracao() { return selectedSvcs().reduce(function (s, x) { return s + x.duracao; }, 0); }
+  function temAberto() { return selectedSvcs().some(function (x) { return x.aPartirDe; }); }
+  function precoLabel(v) { return (temAberto() ? "a partir de " : "") + money(v); }
+  function nomesSvcs() { return selectedSvcs().map(function (x) { return x.nome; }).join(", "); }
 
   // ---------- Armazenamento ----------
   function loadBookings() { try { var r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : []; } catch (e) { return []; } }
@@ -102,26 +114,39 @@
     return t.join(" · ") || "Consulte horários";
   }
 
-  // ---------- Passo 1: serviços ----------
+  // ---------- Passo 1: serviços (múltipla escolha) ----------
   function renderServices() {
     var grid = $("#servicesGrid"); grid.innerHTML = "";
     CFG.servicos.forEach(function (s) {
-      var label = el("label", "option");
+      var sel = state.servicos.indexOf(s.id) !== -1;
+      var label = el("label", "option option--check" + (sel ? " is-selected" : ""));
       label.innerHTML =
-        '<input type="radio" name="servico" value="' + s.id + '">' +
+        '<input type="checkbox" name="servico" value="' + s.id + '"' + (sel ? " checked" : "") + ">" +
         '<span class="opt-emoji">' + (SVC_EMOJI[s.id] || "✂️") + "</span>" +
         '<span class="opt-body"><span class="opt-name">' + s.nome + "</span>" +
         '<span class="opt-meta">' + s.duracao + " min</span></span>" +
-        '<span class="opt-price">' + money(s.preco) + "</span>";
+        '<span class="opt-price">' + (s.aPartirDe ? "a partir de " : "") + money(s.preco) + "</span>" +
+        '<span class="opt-box">✓</span>';
       label.querySelector("input").addEventListener("change", function () {
-        if (state.servico !== s.id) state.horario = null; // duração muda os horários
-        state.servico = s.id;
-        markSelected(grid, label);
-        updateTotal();
-        advance(2);
+        var i = state.servicos.indexOf(s.id);
+        if (i === -1) state.servicos.push(s.id); else state.servicos.splice(i, 1);
+        state.horario = null; // duração total muda os horários
+        label.classList.toggle("is-selected", state.servicos.indexOf(s.id) !== -1);
+        updateSvcBar();
       });
       grid.appendChild(label);
     });
+    updateSvcBar();
+  }
+
+  function updateSvcBar() {
+    var n = state.servicos.length;
+    setText("#svcTotal", n ? precoLabel(totalPreco()) : "—");
+    var btn = $("#svcContinue");
+    if (btn) {
+      btn.disabled = n === 0;
+      btn.textContent = n > 1 ? "Continuar · " + n + " serviços" : "Continuar";
+    }
   }
 
   // ---------- Passo 2: profissionais ----------
@@ -181,13 +206,13 @@
   function renderSlots() {
     var grid = $("#slotsGrid"); grid.innerHTML = "";
     if (!state.dataISO) { grid.appendChild(el("p", "muted slots-empty", "Selecione uma data para ver os horários.")); return; }
-    if (!state.servico) { grid.appendChild(el("p", "muted slots-empty", "Selecione um serviço primeiro.")); return; }
+    if (!state.servicos.length) { grid.appendChild(el("p", "muted slots-empty", "Selecione um serviço primeiro.")); return; }
 
     var d = parseISO(state.dataISO);
     var horario = CFG.horarios[d.getDay()];
     if (!horario) { grid.appendChild(el("p", "muted slots-empty", "Fechado neste dia.")); return; }
 
-    var svc = svcById(state.servico);
+    var dur = totalDuracao();
     var abre = toMinutes(horario.abre), fecha = toMinutes(horario.fecha), passo = CFG.intervaloMinutos;
     var agora = new Date();
     var ehHoje = isoDate(agora) === state.dataISO;
@@ -195,7 +220,7 @@
     var ocupados = ocupadosPara(state.dataISO, state.profissional);
 
     var criados = 0;
-    for (var t = abre; t + svc.duracao <= fecha; t += passo) {
+    for (var t = abre; t + dur <= fecha; t += passo) {
       var hhmm = fromMinutes(t);
       var btn = el("button", "slot"); btn.type = "button"; btn.textContent = hhmm;
       var passado = ehHoje && t <= minutoAgora;
@@ -229,10 +254,13 @@
 
   // ---------- Passo 5: revisão ----------
   function renderReview() {
-    var svc = svcById(state.servico), pro = proById(state.profissional);
+    var pro = proById(state.profissional);
+    var svcTxt = state.servicos.length
+      ? nomesSvcs() + " · " + totalDuracao() + " min · " + precoLabel(totalPreco())
+      : "—";
     var card = $("#reviewCard");
     card.innerHTML =
-      reviewRow("💈", "Serviço", svc ? svc.nome + " · " + svc.duracao + " min" : "—", 1) +
+      reviewRow("💈", state.servicos.length > 1 ? "Serviços" : "Serviço", svcTxt, 1) +
       reviewRow("👤", "Profissional", pro ? pro.nome : "—", 2) +
       reviewRow("📅", "Data", state.dataISO ? formatDataLonga(state.dataISO) : "—", 3) +
       reviewRow("🕒", "Horário", state.horario || "—", 4);
@@ -242,11 +270,13 @@
 
     var note = $("#sinalNote");
     if (note) {
-      if (svc && sinalAtivo()) {
+      var total = totalPreco();
+      if (state.servicos.length && sinalAtivo()) {
+        var sin = valorSinal(total);
         note.innerHTML =
           '<span class="sn-emoji">💸</span>' +
-          '<span class="sn-body"><b>Sinal de ' + money(valorSinal(svc.preco)) + '</b> (' + pctSinal() + '%) via Pix' +
-          '<span class="sn-sub">Restante de ' + money(svc.preco - valorSinal(svc.preco)) + ' no local. O código Pix aparece após confirmar.</span></span>';
+          '<span class="sn-body"><b>Sinal de ' + money(sin) + '</b> (' + pctSinal() + '%) via Pix' +
+          '<span class="sn-sub">Restante de ' + precoLabel(total - sin) + ' no local. O código Pix aparece após confirmar.</span></span>';
         note.hidden = false;
       } else {
         note.hidden = true;
@@ -298,9 +328,9 @@
   }
 
   function setKickers() {
-    var svc = svcById(state.servico), pro = proById(state.profissional);
+    var pro = proById(state.profissional), n = state.servicos.length;
     var k2 = $('.wizard-step[data-step="2"] .step-kicker');
-    if (k2) k2.textContent = svc ? svc.nome + " · " + money(svc.preco) : "Serviço escolhido";
+    if (k2) k2.textContent = n ? (n > 1 ? n + " serviços · " : "") + precoLabel(totalPreco()) : "Serviço escolhido";
     var k3 = $('.wizard-step[data-step="3"] .step-kicker');
     if (k3) k3.textContent = pro ? pro.nome : "Quase lá";
     var k4 = $("#step4Kicker");
@@ -308,8 +338,8 @@
   }
 
   function updateTotal() {
-    var svc = svcById(state.servico);
-    var total = $("#abTotal"); if (total) total.textContent = svc ? money(svc.preco) : "—";
+    var total = $("#abTotal");
+    if (total) total.textContent = state.servicos.length ? precoLabel(totalPreco()) : "—";
   }
 
   // ---------- Submit ----------
@@ -319,7 +349,7 @@
     var nome = $("#fldNome").value.trim(), tel = $("#fldTelefone").value.trim(), obs = $("#fldObs").value.trim();
 
     var faltando = [];
-    if (!state.servico) faltando.push("um serviço");
+    if (!state.servicos.length) faltando.push("um serviço");
     if (!state.profissional) faltando.push("um profissional");
     if (!state.dataISO) faltando.push("uma data");
     if (!state.horario) faltando.push("um horário");
@@ -336,15 +366,18 @@
       return;
     }
 
-    var svc = svcById(state.servico), pro = proById(state.profissional);
+    var pro = proById(state.profissional);
+    var svcs = selectedSvcs();
+    var total = totalPreco();
     var booking = {
       id: "ag_" + isoDate(new Date()).replace(/-/g, "") + "_" + state.horario.replace(":", "") + "_" + (loadBookings().length + 1),
       criadoEm: new Date().toISOString(),
-      servicoId: svc.id, servicoNome: svc.nome, preco: svc.preco, duracao: svc.duracao,
+      servicos: svcs.map(function (s) { return { id: s.id, nome: s.nome, preco: s.preco, duracao: s.duracao }; }),
+      servicoNome: nomesSvcs(), preco: total, duracao: totalDuracao(), aPartirDe: temAberto(),
       profissionalId: pro.id, profissionalNome: pro.nome,
       dataISO: state.dataISO, horario: state.horario,
       cliente: nome, telefone: tel, obs: obs,
-      sinal: sinalAtivo() ? valorSinal(svc.preco) : 0,
+      sinal: sinalAtivo() ? valorSinal(total) : 0,
     };
     var list = loadBookings(); list.push(booking); saveBookings(list);
 
@@ -355,17 +388,19 @@
 
   function resetFlow() {
     $("#bookingForm").reset();
-    state = { servico: null, profissional: null, dataISO: null, horario: null };
+    state = { servicos: [], profissional: null, dataISO: null, horario: null };
     $all(".option.is-selected, .day.is-selected, .slot.is-selected").forEach(function (n) { n.classList.remove("is-selected"); });
+    updateSvcBar();
     updateTotal();
     goTo(1);
   }
+  function bPrecoLabel(b) { return (b.aPartirDe ? "a partir de " : "") + money(b.preco); }
 
   // ---------- Confirmação (bottom sheet) ----------
   function showConfirmation(b) {
     var rows = mbRow("Serviço", b.servicoNome) + mbRow("Profissional", b.profissionalNome) +
       mbRow("Data", formatDataLonga(b.dataISO)) + mbRow("Horário", b.horario) +
-      mbRow("Cliente", b.cliente) + mbRow("Valor", money(b.preco));
+      mbRow("Cliente", b.cliente) + mbRow("Valor", bPrecoLabel(b));
     if (b.sinal) rows += mbRow("Sinal (" + pctSinal() + "%)", money(b.sinal));
     $("#modalBody").innerHTML = rows;
 
@@ -416,7 +451,7 @@
     futuros.forEach(function (b) {
       var card = el("div", "booking-card");
       card.innerHTML =
-        '<div class="bc-title">' + b.servicoNome + " · " + money(b.preco) + "</div>" +
+        '<div class="bc-title">' + b.servicoNome + " · " + bPrecoLabel(b) + "</div>" +
         '<div class="bc-when">' + formatDataLonga(b.dataISO) + " às " + b.horario + "</div>" +
         '<div class="bc-meta">' + b.profissionalNome + " · " + b.cliente + (b.obs ? " · " + b.obs : "") + "</div>" +
         '<div class="bc-actions">' +
@@ -446,6 +481,7 @@
     goTo(1);
 
     $("#bookingForm").addEventListener("submit", onSubmit);
+    $("#svcContinue").addEventListener("click", function () { if (state.servicos.length) advance(2); });
     $("#backBtn").addEventListener("click", function () { goTo(step - 1); });
     $all("[data-close]").forEach(function (n) { n.addEventListener("click", closeModal); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });

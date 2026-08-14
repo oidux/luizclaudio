@@ -1,0 +1,15 @@
+# Segredos e configs locais — NUNCA versionar
+.env
+.env.*
+*.local.js
+assets/js/config.local.js
+supabase/.env
+supabase/.temp/
+service-role*.txt
+*secret*
+*.key
+
+# Dependências / sistema
+node_modules/
+.DS_Store
+Thumbs.db
