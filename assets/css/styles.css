@@ -115,8 +115,12 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Main / steps ---------- */
 .app-main {
   flex: 1;
-  padding: 22px 16px calc(var(--bar-h) + env(safe-area-inset-bottom) + 16px);
+  padding: 22px 16px calc(66px + env(safe-area-inset-bottom) + 20px);
 }
+.view { display: none; }
+.view.is-active { display: block; }
+/* botão voltar do wizard só existe na aba Agendar */
+.app:not([data-view="agendar"]) .back-btn { display: none !important; }
 .wizard-step { display: none; animation: stepIn 0.32s cubic-bezier(0.16,1,0.3,1); }
 .wizard-step.is-active { display: block; }
 @keyframes stepIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
@@ -382,3 +386,131 @@ a { color: inherit; text-decoration: none; }
 .sheet-body .mb-row { display: flex; justify-content: space-between; gap: 12px; font-size: 0.95rem; }
 .sheet-body .mb-row span:first-child { color: var(--muted); }
 .sheet-actions { display: grid; gap: 10px; }
+
+/* ================= Confirmar (inline no passo 5) ================= */
+.confirm-inline {
+  display: flex; align-items: center; gap: 14px;
+  border: 1.5px solid var(--border); border-radius: 16px;
+  background: var(--surface); padding: 12px 14px; margin-top: 20px;
+}
+.confirm-inline .ci-total { display: flex; flex-direction: column; line-height: 1.15; }
+.confirm-inline .btn { flex: 1; }
+.fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ================= Barra de abas ================= */
+.tabbar {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 45;
+  width: 100%; max-width: 480px;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: rgba(16,18,24,0.97); backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: 0; cursor: pointer;
+  padding: 9px 4px 8px; color: var(--muted); font-size: 0.72rem; font-weight: 600; font-family: inherit;
+}
+.tab .tab-ico { font-size: 1.25rem; filter: grayscale(0.4); opacity: 0.8; }
+.tab.is-active { color: var(--accent-strong); }
+.tab.is-active .tab-ico { filter: none; opacity: 1; }
+
+/* ================= Fidelidade ================= */
+.member-hero {
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 2px 20px;
+}
+.mh-avatar {
+  width: 56px; height: 56px; border-radius: 50%; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 1.5rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong)); color: var(--accent-ink);
+}
+.mh-hi { font-size: 1.25rem; font-weight: 800; }
+.mh-sub { color: var(--muted); font-size: 0.85rem; }
+
+.stamp-card {
+  border: 1.5px solid rgba(212,162,78,0.4); border-radius: 18px;
+  background: linear-gradient(160deg, var(--surface), var(--surface-2));
+  padding: 18px 16px;
+}
+.sc-top { display: flex; justify-content: space-between; align-items: baseline; }
+.sc-title { font-weight: 800; font-size: 1.05rem; }
+.sc-count { color: var(--accent-strong); font-weight: 800; font-variant-numeric: tabular-nums; }
+.sc-rule { color: var(--muted); font-size: 0.85rem; margin: 4px 0 16px; }
+.stamp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.stamp {
+  aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%;
+  border: 1.5px dashed var(--border); background: var(--app-bg);
+  color: var(--muted); font-size: 0.95rem; font-weight: 700;
+}
+.stamp.is-filled {
+  border: 1.5px solid var(--accent); background: rgba(212,162,78,0.16); color: var(--text);
+}
+.sc-faltam { margin: 16px 0 0; text-align: center; color: var(--muted); }
+.sc-faltam b { color: var(--accent-strong); }
+.sc-ready { margin: 16px 0 12px; text-align: center; font-weight: 700; color: var(--ok); }
+
+.history-list { display: grid; gap: 10px; }
+.hist-card {
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 13px 14px;
+}
+.hist-card .hc-emoji {
+  width: 42px; height: 42px; border-radius: 11px; flex: 0 0 auto;
+  display: grid; place-items: center; background: var(--surface-2); font-size: 1.15rem;
+}
+.hist-card .hc-body { flex: 1; min-width: 0; }
+.hist-card .hc-serv { font-weight: 600; }
+.hist-card .hc-meta { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+.hist-card .hc-val { font-weight: 700; color: var(--accent-strong); flex: 0 0 auto; }
+
+/* ================= Clube (planos) ================= */
+.sub-active {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border: 1.5px solid var(--ok); border-radius: 14px;
+  background: rgba(76,183,130,0.1); padding: 14px 15px; margin-bottom: 18px;
+}
+.sub-active .sa-cap { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ok); }
+.sub-active .sa-name { font-weight: 800; font-size: 1.05rem; }
+.sub-active .sa-price { color: var(--muted); font-size: 0.85rem; }
+.sub-active .btn-danger { min-height: 40px; padding: 8px 14px; }
+
+.plans { display: grid; gap: 14px; }
+.plan {
+  position: relative;
+  border: 1.5px solid var(--border); border-radius: 18px; background: var(--surface); padding: 20px 18px;
+}
+.plan.is-featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.plan.is-current { opacity: 0.75; }
+.plan-badge {
+  position: absolute; top: -11px; left: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong)); color: var(--accent-ink);
+  font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px;
+}
+.plan-name { font-size: 1.15rem; font-weight: 800; }
+.plan-price { font-size: 2rem; font-weight: 800; color: var(--accent-strong); margin: 4px 0 14px; }
+.plan-price span { font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+.plan-benes { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 9px; }
+.plan-benes li { position: relative; padding-left: 26px; font-size: 0.94rem; }
+.plan-benes li::before {
+  content: "✓"; position: absolute; left: 0; top: 0;
+  color: var(--ok); font-weight: 800;
+}
+
+/* ================= Checkout (cartão) ================= */
+.link-back { background: none; border: 0; color: var(--accent-strong); font-size: 0.95rem; font-weight: 600; cursor: pointer; padding: 6px 0 12px; }
+.cc-preview {
+  border-radius: 18px; padding: 20px; margin-bottom: 22px; color: #fff;
+  background: linear-gradient(135deg, #2a2f3b 0%, #3a3050 60%, #4a3a2a 100%);
+  box-shadow: var(--shadow); aspect-ratio: 1.6; display: flex; flex-direction: column; justify-content: space-between;
+}
+.cc-brand { align-self: flex-end; font-weight: 800; letter-spacing: 1px; font-size: 1rem; }
+.cc-number { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.35rem; letter-spacing: 2px; }
+.cc-row { display: flex; justify-content: space-between; gap: 16px; font-size: 0.95rem; }
+.cc-row .cc-cap { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 2px; }
+.recurring-note { color: var(--muted); font-size: 0.86rem; margin: 4px 0 0; }
+.demo-note {
+  font-size: 0.82rem; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin: 0;
+}
+.ok-text { text-align: center; margin: 0; color: var(--muted); }
