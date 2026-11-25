@@ -2,6 +2,8 @@
    Área de demonstração: dados de membro são fictícios e ficam no localStorage. */
 (function () {
   "use strict";
+  // Rola para o topo: a janela (celular) ou a coluna .app (telas largas, onde ela é o container de rolagem).
+  function scrollTopo(opts) { var o = opts || { top: 0 }; window.scrollTo(o); var a = document.querySelector(".app"); if (a && a.scrollTo) a.scrollTo(o); }
 
   var CFG = window.SHOP_CONFIG || {};
   var MKEY = "lc_barbearia_membro_v1";
@@ -44,7 +46,7 @@
     $all(".tab").forEach(function (t) { t.classList.toggle("is-active", t.getAttribute("data-tab") === name); });
     if (name === "fidelidade") renderFidelidade();
     if (name === "clube") renderClube();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollTopo({ top: 0, behavior: "smooth" });
   }
 
   // ---------- Fidelidade ----------
@@ -132,7 +134,7 @@
     $("#ccSubmit").textContent = "Assinar · " + money(pl.preco) + "/mês";
     $("#clubePlansPanel").hidden = true;
     $("#clubeCheckoutPanel").hidden = false;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollTopo({ top: 0, behavior: "smooth" });
   }
 
   // ---------- Cartão de crédito (máscara + preview) ----------
@@ -201,7 +203,7 @@
     $all(".tab").forEach(function (t) { t.addEventListener("click", function () { switchView(t.getAttribute("data-tab")); }); });
     $all("[data-close-ok]").forEach(function (n) { n.addEventListener("click", function () { $("#okSheet").hidden = true; }); });
     $("#clubeBack").addEventListener("click", function () {
-      $("#clubePlansPanel").hidden = false; $("#clubeCheckoutPanel").hidden = true; window.scrollTo({ top: 0 });
+      $("#clubePlansPanel").hidden = false; $("#clubeCheckoutPanel").hidden = true; scrollTopo({ top: 0 });
     });
     setupCC();
     renderFidelidade();

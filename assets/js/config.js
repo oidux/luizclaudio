@@ -47,21 +47,34 @@ window.SHOP_CONFIG = {
   // Quantos dias à frente é possível agendar
   diasDisponiveis: 21,
 
+  // --- Grupos de serviço (passo 1 do agendamento) ---
+  // tipo "unico": o cliente escolhe no máximo 1 opção do grupo (ex.: um corte só).
+  // tipo "multiplo": pode marcar várias opções (extras).
+  // A ordem aqui é a ordem em que os grupos aparecem na tela.
+  grupos: [
+    { id: "cabelo",  nome: "Cabelo",          tipo: "unico" },
+    { id: "barba",   nome: "Barba",           tipo: "unico" },
+    { id: "limpeza", nome: "Limpeza de pele", tipo: "unico" },
+    { id: "extras",  nome: "Extras",          tipo: "multiplo" },
+  ],
+
   // --- Serviços ---
+  // grupo: id de um dos grupos acima. curto: nome mostrado dentro do grupo.
+  // nome: nome completo (resumo, confirmação, Pix e WhatsApp).
   // duracao em minutos; preco em R$. aPartirDe: mostra "a partir de".
   servicos: [
-    { id: "social",            nome: "Cabelo social",              duracao: 30, preco: 30 },
-    { id: "social-maquina",    nome: "Cabelo social simples (máquina)", duracao: 20, preco: 25 },
-    { id: "degrade",           nome: "Cabelo degradê",             duracao: 40, preco: 35 },
-    { id: "degrade-navalhado", nome: "Cabelo degradê navalhado",   duracao: 45, preco: 40 },
-    { id: "pesinho",           nome: "Pesinho",                    duracao: 10, preco: 15 },
-    { id: "sobrancelha",       nome: "Sobrancelha",                duracao: 15, preco: 15 },
-    { id: "barba",             nome: "Barba",                      duracao: 30, preco: 25 },
-    { id: "barba-pigmentacao", nome: "Barba e pigmentação",        duracao: 45, preco: 45 },
-    { id: "infantil",          nome: "Corte infantil",             duracao: 30, preco: 35 },
-    { id: "limpeza-simples",   nome: "Limpeza de pele simples",    duracao: 20, preco: 25 },
-    { id: "limpeza-completa",  nome: "Limpeza de pele completa",   duracao: 30, preco: 35 },
-    { id: "progressiva",       nome: "Progressiva",                duracao: 90, preco: 70, aPartirDe: true },
+    { id: "social",            grupo: "cabelo",  curto: "Social",            nome: "Cabelo social",              duracao: 30, preco: 30 },
+    { id: "social-maquina",    grupo: "cabelo",  curto: "Social na máquina", nome: "Cabelo social simples (máquina)", duracao: 20, preco: 25 },
+    { id: "degrade",           grupo: "cabelo",  curto: "Degradê",           nome: "Cabelo degradê",             duracao: 40, preco: 35 },
+    { id: "degrade-navalhado", grupo: "cabelo",  curto: "Degradê navalhado", nome: "Cabelo degradê navalhado",   duracao: 45, preco: 40 },
+    { id: "infantil",          grupo: "cabelo",  curto: "Infantil",          nome: "Corte infantil",             duracao: 30, preco: 35 },
+    { id: "pesinho",           grupo: "cabelo",  curto: "Pesinho",           nome: "Pesinho",                    duracao: 10, preco: 15 },
+    { id: "barba",             grupo: "barba",   curto: "Barba",             nome: "Barba",                      duracao: 30, preco: 25 },
+    { id: "barba-pigmentacao", grupo: "barba",   curto: "Barba e pigmentação", nome: "Barba e pigmentação",      duracao: 45, preco: 45 },
+    { id: "limpeza-simples",   grupo: "limpeza", curto: "Simples",           nome: "Limpeza de pele simples",    duracao: 20, preco: 25 },
+    { id: "limpeza-completa",  grupo: "limpeza", curto: "Completa",          nome: "Limpeza de pele completa",   duracao: 30, preco: 35 },
+    { id: "sobrancelha",       grupo: "extras",  curto: "Sobrancelha",       nome: "Sobrancelha",                duracao: 15, preco: 15 },
+    { id: "progressiva",       grupo: "extras",  curto: "Progressiva",       nome: "Progressiva",                duracao: 90, preco: 70, aPartirDe: true },
   ],
 
   // --- Profissionais ---
