@@ -1,6 +1,8 @@
 /* Portal de agendamento — Luiz Claudio Barbearia (fluxo passo a passo) */
 (function () {
   "use strict";
+  // Rola para o topo: a janela (celular) ou a coluna .app (telas largas, onde ela é o container de rolagem).
+  function scrollTopo(opts) { var o = opts || { top: 0 }; window.scrollTo(o); var a = document.querySelector(".app"); if (a && a.scrollTo) a.scrollTo(o); }
 
   var CFG = window.SHOP_CONFIG;
   var STORAGE_KEY = "lc_barbearia_agendamentos_v1";
@@ -10,11 +12,6 @@
   var DOW_LONG = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
   var MON_SHORT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-  var SVC_EMOJI = {
-    social: "✂️", "social-maquina": "✂️", degrade: "💈", "degrade-navalhado": "🪒",
-    pesinho: "📏", sobrancelha: "👁️", barba: "🧔", "barba-pigmentacao": "🧔",
-    infantil: "🧒", "limpeza-simples": "🧖", "limpeza-completa": "🧖", progressiva: "💇"
-  };
   var PRO_EMOJI = { luiz: "💈", qualquer: "👥" };
 
   var state = { servicos: [], profissional: null, dataISO: null, horario: null };
@@ -114,27 +111,121 @@
     return t.join(" · ") || "Consulte horários";
   }
 
-  // ---------- Passo 1: serviços (múltipla escolha) ----------
+  // ---------- Passo 1: serviços por grupo (acordeão) ----------
+  // Grupos "unico" aceitam 1 opção (ex.: um corte só); "multiplo" aceita várias.
+  var GRUPO_EMOJI = { cabelo: "✂️", barba: "🧔", limpeza: "🧖", extras: "✨" };
+  var openGroup = null;
+
+  function grupos() {
+    if (CFG.grupos && CFG.grupos.length) return CFG.grupos;
+    return [{ id: "_todos", nome: "Serviços", tipo: "multiplo" }]; // config antiga sem grupos
+  }
+  function grupoDe(s) { return CFG.grupos && CFG.grupos.length ? s.grupo : "_todos"; }
+  function grupoById(id) { return grupos().filter(function (g) { return g.id === id; })[0] || null; }
+  function svcsDoGrupo(gid) { return CFG.servicos.filter(function (s) { return grupoDe(s) === gid; }); }
+  function curto(s) { return s.curto || s.nome; }
+
+  // Remove ids inválidos/duplicados e garante no máx. 1 por grupo "unico"
+  // (a última escolha vence). Mantém a ordem do config.
+  function normalizeSel(ids) {
+    var porGrupo = {}, out = [];
+    (ids || []).forEach(function (id) {
+      var s = svcById(id); if (!s) return;
+      var g = grupoById(grupoDe(s));
+      if (g && g.tipo === "unico") porGrupo[g.id] = id;
+      else if (out.indexOf(id) === -1) out.push(id);
+    });
+    Object.keys(porGrupo).forEach(function (k) { out.push(porGrupo[k]); });
+    return CFG.servicos.map(function (s) { return s.id; }).filter(function (id) { return out.indexOf(id) !== -1; });
+  }
+
+  function toggleSvc(s) {
+    var g = grupoById(grupoDe(s));
+    var sel = state.servicos.indexOf(s.id) !== -1;
+    if (sel) {
+      state.servicos = state.servicos.filter(function (id) { return id !== s.id; });
+    } else {
+      if (g && g.tipo === "unico") {
+        state.servicos = state.servicos.filter(function (id) { return grupoDe(svcById(id)) !== g.id; });
+        openGroup = null; // escolheu: fecha o card
+      }
+      state.servicos.push(s.id);
+    }
+    state.servicos = normalizeSel(state.servicos);
+    state.horario = null; // duração total muda os horários
+    renderServices();
+  }
+
   function renderServices() {
+    state.servicos = normalizeSel(state.servicos);
     var grid = $("#servicesGrid"); grid.innerHTML = "";
-    CFG.servicos.forEach(function (s) {
-      var sel = state.servicos.indexOf(s.id) !== -1;
-      var label = el("label", "option option--check" + (sel ? " is-selected" : ""));
-      label.innerHTML =
-        '<input type="checkbox" name="servico" value="' + s.id + '"' + (sel ? " checked" : "") + ">" +
-        '<span class="opt-emoji">' + (SVC_EMOJI[s.id] || "✂️") + "</span>" +
-        '<span class="opt-body"><span class="opt-name">' + s.nome + "</span>" +
-        '<span class="opt-meta">' + s.duracao + " min</span></span>" +
-        '<span class="opt-price">' + (s.aPartirDe ? "a partir de " : "") + money(s.preco) + "</span>" +
-        '<span class="opt-box">✓</span>';
-      label.querySelector("input").addEventListener("change", function () {
-        var i = state.servicos.indexOf(s.id);
-        if (i === -1) state.servicos.push(s.id); else state.servicos.splice(i, 1);
-        state.horario = null; // duração total muda os horários
-        label.classList.toggle("is-selected", state.servicos.indexOf(s.id) !== -1);
-        updateSvcBar();
+    grid.classList.add("svc-groups");
+    grupos().forEach(function (g) {
+      var itens = svcsDoGrupo(g.id);
+      if (!itens.length) return;
+      var escolhidos = itens.filter(function (s) { return state.servicos.indexOf(s.id) !== -1; });
+      var aberto = openGroup === g.id;
+      var multi = g.tipo !== "unico";
+
+      var card = el("div", "svc-group" + (aberto ? " is-open" : "") + (escolhidos.length ? " is-selected" : ""));
+      var minPreco = Math.min.apply(null, itens.map(function (s) { return s.preco; }));
+      var meta, preco = "";
+      if (escolhidos.length) {
+        meta = escolhidos.map(curto).join(" + ") + " · " +
+          escolhidos.reduce(function (t, s) { return t + s.duracao; }, 0) + " min";
+        preco = (escolhidos.some(function (s) { return s.aPartirDe; }) ? "a partir de " : "") +
+          money(escolhidos.reduce(function (t, s) { return t + s.preco; }, 0));
+      } else {
+        meta = "a partir de " + money(minPreco);
+      }
+      var listId = "svc-list-" + g.id;
+      var head = el("button", "svc-head");
+      head.type = "button";
+      head.setAttribute("aria-expanded", aberto ? "true" : "false");
+      head.setAttribute("aria-controls", listId);
+      head.innerHTML =
+        '<span class="opt-emoji" aria-hidden="true">' + (GRUPO_EMOJI[g.id] || "✂️") + "</span>" +
+        '<span class="opt-body"><span class="opt-name">' + g.nome + "</span>" +
+        '<span class="opt-meta">' + meta + "</span></span>" +
+        (preco ? '<span class="opt-price">' + preco + "</span>" : "") +
+        '<span class="svc-chev" aria-hidden="true"></span>';
+      head.addEventListener("click", function () {
+        openGroup = aberto ? null : g.id;
+        renderServices();
       });
-      grid.appendChild(label);
+      card.appendChild(head);
+
+      var list = el("div", "svc-list");
+      list.id = listId;
+      list.setAttribute("role", multi ? "group" : "radiogroup");
+      list.setAttribute("aria-label", g.nome);
+      list.hidden = !aberto;
+      itens.forEach(function (s) {
+        var sel = state.servicos.indexOf(s.id) !== -1;
+        var opt = el("button", "svc-opt" + (sel ? " is-selected" : ""));
+        opt.type = "button";
+        opt.setAttribute("role", multi ? "checkbox" : "radio");
+        opt.setAttribute("aria-checked", sel ? "true" : "false");
+        opt.innerHTML =
+          '<span class="svc-mark ' + (multi ? "svc-mark--check" : "svc-mark--radio") + '" aria-hidden="true"></span>' +
+          '<span class="opt-body"><span class="svc-opt-name">' + curto(s) + "</span>" +
+          '<span class="opt-meta">' + s.duracao + " min</span></span>" +
+          '<span class="svc-opt-price">' + (s.aPartirDe ? "a partir de " : "") + money(s.preco) + "</span>";
+        opt.addEventListener("click", function () { toggleSvc(s); });
+        list.appendChild(opt);
+      });
+      if (escolhidos.length) {
+        var rm = el("button", "svc-remove", multi ? "Limpar seleção" : "Remover " + g.nome.toLowerCase());
+        rm.type = "button";
+        rm.addEventListener("click", function () {
+          state.servicos = state.servicos.filter(function (id) { return grupoDe(svcById(id)) !== g.id; });
+          state.horario = null;
+          renderServices();
+        });
+        list.appendChild(rm);
+      }
+      card.appendChild(list);
+      grid.appendChild(card);
     });
     updateSvcBar();
   }
@@ -324,7 +415,7 @@
     // "meus agendamentos" só na tela inicial
     $all(".post-booking").forEach(function (p) { p.classList.toggle("is-visible", n === 1); });
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollTopo({ top: 0, behavior: "smooth" });
   }
 
   function setKickers() {
@@ -390,7 +481,8 @@
     $("#bookingForm").reset();
     state = { servicos: [], profissional: null, dataISO: null, horario: null };
     $all(".option.is-selected, .day.is-selected, .slot.is-selected").forEach(function (n) { n.classList.remove("is-selected"); });
-    updateSvcBar();
+    openGroup = null;
+    renderServices();
     updateTotal();
     goTo(1);
   }

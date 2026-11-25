@@ -1,29 +1,32 @@
 # Diretrizes do projeto — Portal Luiz Claudio Barbearia
 
-## Regra de responsividade (obrigatória)
+## Regra de layout (obrigatória): mobile em todo lugar
 
-**Toda tela e todo componente devem ser responsivos para mobile E desktop.**
-Qualquer mudança na interface precisa funcionar bem nos dois — não entregue algo
-que só fique bom no celular ou só no desktop.
+**O portal é desenhado só para celular. No desktop ele mostra a mesma coluna de
+celular, centralizada na tela.** Não existe layout de desktop próprio.
 
 Convenções em uso:
-- **Mobile-first**: o CSS base é para celular; o desktop é ajustado em
-  `@media (min-width: 760px)` no fim de `assets/css/styles.css`.
-- No **mobile** a navegação é por abas fixas na base; no **desktop** as abas vão
-  para o topo (horizontais) e o conteúdo vira um "card" central com grades em
-  múltiplas colunas (serviços, horários, planos).
-- Use unidades relativas, `max-width`, grid/flex; conteúdo largo (tabelas, grades)
-  nunca deve estourar a largura da página.
+- O `.app` tem `max-width: 480px` e fica centralizado; acima de 520px ganha
+  bordas laterais finas. Elementos fixos (abas na base, barra de ação, sheets)
+  também ficam limitados a 480px e centralizados.
+- A navegação é sempre por abas fixas na base, inclusive no desktop.
+- Acima de 520px a rolagem é **dentro do `.app`** (a janela não rola) e a barra
+  de rolagem fica invisível, para nada mudar de posição. Para rolar ao topo via
+  JS use `scrollTopo()` (rola a janela e o `.app`), não `window.scrollTo`.
+- **Não crie** `@media` de desktop com grades largas, abas no topo ou colunas
+  extras. O fluxo é vertical.
+- Use unidades relativas, `max-width`, grid/flex; nada pode estourar a largura
+  da coluna.
 - Respeite `env(safe-area-inset-*)` (notch) e `viewport-fit=cover`.
-- **Ao criar/alterar telas, sempre verifique nos dois tamanhos** (ex.: ~390px e
-  ~1280px) antes de concluir.
+- **Ao criar/alterar telas, verifique em ~390px e confira em ~1280px** que a
+  coluna continua centralizada e sem quebra.
 
 ## Arquitetura
 
 Site estático, sem backend. Dados persistem no `localStorage` do navegador.
 
 - `index.html` — estrutura (abas + views: Agendar, Fidelidade, Clube)
-- `assets/css/styles.css` — estilos (mobile-first + bloco desktop no fim)
+- `assets/css/styles.css` — estilos (só mobile; sem bloco de desktop)
 - `assets/js/config.js` — **configuração editável** (dados da barbearia, serviços,
   horários, sinal/Pix, fidelidade, planos)
 - `assets/js/app.js` — fluxo de agendamento (wizard passo a passo)
